@@ -5,10 +5,10 @@ module Twitch
     # Module for EventSub webhook functionality
     module Webhooks
       ## https://dev.twitch.tv/docs/api/reference#create-eventsub-subscription
-      def create_webhook_subscription(type:, condition:, callback_url:, secret:)
+      def create_webhook_subscription(type:, condition:, callback_url:, secret:, version: '1')
         initialize_response nil, post('eventsub/subscriptions', {
           type: type,
-          version: '1',
+          version: version,
           condition: condition,
           transport: {
             method: 'webhook',

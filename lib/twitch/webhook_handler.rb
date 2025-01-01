@@ -23,17 +23,20 @@ module Twitch
     end
 
     class_methods do
-      def subscribe_to(type, **condition)
+      def subscribe_to(type, version: '1', **condition)
         subscription_types << {
           type: type,
+          version: version.to_s,
           condition: condition
         }
       end
 
+      # rubocop:disable Metrics/MethodLength
       def register_subscriptions(client)
-        self.class.subscription_types.each do |subscription|
+        subscription_types.each do |subscription|
           client.create_webhook_subscription(
             type: subscription[:type],
+            version: subscription[:version],
             condition: subscription[:condition],
             callback_url: webhook_callback_url,
             secret: webhook_secret
