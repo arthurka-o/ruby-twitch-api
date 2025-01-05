@@ -33,28 +33,17 @@ module Twitch
         }
       end
 
-      # rubocop:disable Metrics/MethodLength
       def register_subscriptions(client)
         subscription_types.each do |subscription|
-          hash = {
-            type: subscription[:type],
-            version: subscription[:version],
-            condition: subscription[:condition],
-            callback_url: webhook_callback_url,
-            secret: webhook_secret
-          }
-
-          puts hash
-
           client.create_webhook_subscription(
             type: subscription[:type],
             version: subscription[:version],
             condition: subscription[:condition],
-            callback_url: webhook_callback_url,
-            secret: webhook_secret
+            callback_url: WebhookConfig.callback_url,
+            secret: WebhookConfig.secret
           )
         rescue Twitch::APIError => e
-          Rails.logger.error "Failed to register webhook subscription: #{e.message}"
+          WebhookConfig.log_error("Failed to register webhook subscription: #{e.message}")
         end
       end
     end
@@ -66,13 +55,13 @@ module Twitch
 
       def register_handler(handler_class)
         handlers << handler_class
-        puts "Registered handler: #{handler_class}"
+        WebhookConfig.log("Registered Twitch webhook handler: #{handler_class}")
       end
 
       def setup_client(client)
-        puts "Setting up client for #{handlers.count} handlers"
+        WebhookConfig.log("Setting up Twitch webhook client for #{handlers.count} handlers")
         handlers.each do |handler_class|
-          puts "Configuring handler: #{handler_class}"
+          WebhookConfig.log("Configuring handler: #{handler_class}")
           handler_class.twitch_client = client
           handler_class.register_subscriptions(client)
         end
@@ -96,7 +85,7 @@ module Twitch
 
     def verify_twitch_signature!
       message = build_hmac_message
-      hmac = "#{HMAC_PREFIX}#{generate_hmac(webhook_secret, message)}"
+      hmac = "#{HMAC_PREFIX}#{generate_hmac(WebhookConfig.secret, message)}"
       return if secure_compare(hmac, request.headers[HEADER_MESSAGE_SIGNATURE])
 
       head :forbidden
@@ -134,14 +123,6 @@ module Twitch
       event_data = JSON.parse(request.raw_post)
       process_revocation(event_data)
       head :no_content
-    end
-
-    def webhook_secret
-      raise NotImplementedError, 'Define webhook_secret in your controller'
-    end
-
-    def webhook_callback_url
-      raise NotImplementedError, 'Define webhook_callback_url in your controller'
     end
 
     def process_event(type, data)
