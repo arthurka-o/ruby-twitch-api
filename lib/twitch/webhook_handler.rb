@@ -34,14 +34,6 @@ module Twitch
       # rubocop:disable Metrics/MethodLength
       def register_subscriptions(client)
         subscription_types.each do |subscription|
-          client.create_webhook_subscription(
-            type: subscription[:type],
-            version: subscription[:version],
-            condition: subscription[:condition],
-            callback_url: webhook_callback_url,
-            secret: webhook_secret
-          )
-
           hash = {
             type: subscription[:type],
             version: subscription[:version],
@@ -51,9 +43,16 @@ module Twitch
           }
 
           puts hash
+
+          client.create_webhook_subscription(
+            type: subscription[:type],
+            version: subscription[:version],
+            condition: subscription[:condition],
+            callback_url: webhook_callback_url,
+            secret: webhook_secret
+          )
         rescue Twitch::APIError => e
           Rails.logger.error "Failed to register webhook subscription: #{e.message}"
-          puts e
         end
       end
     end
