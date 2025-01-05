@@ -15,7 +15,7 @@ module Twitch
         on_setup&.call
 
         # Setup handlers with client
-        WebhookHandler.setup_client(client, logger)
+        WebhookHandler.setup_client(client)
       end
 
       def log(message)

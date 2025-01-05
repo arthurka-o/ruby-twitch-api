@@ -24,17 +24,24 @@ module Twitch
 
     class_methods do
       def subscribe_to(type, version: '1', **condition)
-        stringified_condition = condition.transform_values(&:to_s)
+        transformed_condition = condition.transform_values do |value|
+          value.respond_to?(:call) ? value.call : value.to_s
+        end
 
         subscription_types << {
           type: type,
           version: version.to_s,
-          condition: stringified_condition
+          condition: transformed_condition
         }
       end
 
       def register_subscriptions(client)
         subscription_types.each do |subscription|
+          WebhookConfig.log('Processing subscription:')
+          WebhookConfig.log("Type: #{subscription[:type]}")
+          WebhookConfig.log("Version: #{subscription[:version]}")
+          WebhookConfig.log("Condition: #{subscription[:condition].inspect}")
+
           client.create_webhook_subscription(
             type: subscription[:type],
             version: subscription[:version],
