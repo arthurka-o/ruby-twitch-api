@@ -24,10 +24,12 @@ module Twitch
 
     class_methods do
       def subscribe_to(type, version: '1', **condition)
+        stringified_condition = condition.transform_values(&:to_s)
+
         subscription_types << {
           type: type,
           version: version.to_s,
-          condition: condition
+          condition: stringified_condition
         }
       end
 
