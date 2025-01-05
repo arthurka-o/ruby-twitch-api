@@ -6,7 +6,7 @@ module Twitch
     module Webhooks
       ## https://dev.twitch.tv/docs/api/reference#create-eventsub-subscription
       def create_webhook_subscription(type:, condition:, callback_url:, secret:, version: '1')
-        initialize_response nil, post('eventsub/subscriptions', {
+        response = initialize_response nil, post('eventsub/subscriptions', {
           type: type,
           version: version,
           condition: condition,
@@ -16,6 +16,9 @@ module Twitch
             secret: secret
           }
         })
+
+        puts response.data
+        puts response.raw
       end
 
       ## https://dev.twitch.tv/docs/api/reference#get-eventsub-subscriptions
