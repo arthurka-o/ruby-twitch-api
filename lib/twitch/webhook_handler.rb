@@ -41,8 +41,19 @@ module Twitch
             callback_url: webhook_callback_url,
             secret: webhook_secret
           )
+
+          hash = {
+            type: subscription[:type],
+            version: subscription[:version],
+            condition: subscription[:condition],
+            callback_url: webhook_callback_url,
+            secret: webhook_secret
+          }
+
+          puts hash
         rescue Twitch::APIError => e
           Rails.logger.error "Failed to register webhook subscription: #{e.message}"
+          puts e
         end
       end
     end
