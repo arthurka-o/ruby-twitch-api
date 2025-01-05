@@ -111,6 +111,7 @@ module Twitch
     include CustomRewards
 
     require_relative 'client/webhooks'
+    include Webhooks
 
     ## https://dev.twitch.tv/docs/api/reference#get-channel-information
     def get_channels(options = {})
